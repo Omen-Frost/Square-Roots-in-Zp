@@ -1,10 +1,13 @@
 import math
+import random
 import primes_finder as pf
 
 class stats:
     # track number of squarings and multiplications operations
     SQR = 0
     MULT = 0
+    SUM_SQR = 0
+    SUM_MULT = 0
 
 
 def get_g(m, p):
@@ -148,21 +151,14 @@ def findSqRoot(u, p, n, m, g, G, L, K, ops):
 
 # ****** Algorithm ends ********
 
+def work(p, ops):
 
-def main():
-
-    print("Enter an odd prime p corresponding to the prime field Zp:", end=' ')
-    p = int(input().strip())
-    print("Enter a square in Zp:", end=' ')
-    u = int(input().strip())
-    u %= p
-
-    if not isSquare(u, p):
-        print("Not a square. End.")
-        exit()
-
-    ops = stats()
-
+    # Select a random square u in Zp
+    z = random.randint(1, p)    
+    u = (z*z)%p
+    ops.SQR=0
+    ops.MULT=0
+    
     #  precomputaions
     n = 0
     m = p-1
@@ -177,10 +173,34 @@ def main():
 
     # find square root of u
     root = findSqRoot(u, p, n, m, g, G, L, K, ops)
-    print("Square root: ", root)
-    print("#Squarings S = {} \n#Multiplications M = {} \nTotal ops = {}".format(
-        ops.SQR, ops.MULT, ops.SQR+ops.MULT))
 
+    #verify
+    if (root*root)%p != u :
+        print("WRONG ANSWER!",p,u,root)
+    
+    
+
+
+def main():
+
+    print("Enter n (p = 1+m*2^n) : ", end='')
+    n = int(input().strip())
+
+    sample_len=1000
+    print("Searching Primes")
+    L = pf.get_primes(n,sample_len)
+    # print("List of primes:")
+    # print(L)
+    print("Executing...")
+
+    ops = stats()
+    for p in L:
+        work(p, ops)
+        ops.SUM_MULT+=ops.MULT
+        ops.SUM_SQR+=ops.SQR
+    
+    print("# Avg Squarings S = {:.2f} \n# Avg Multiplications M = {:.2f} \n# Avg Total ops = {:.2f}".format(
+        ops.SUM_SQR/sample_len, ops.SUM_MULT/sample_len, (ops.SUM_SQR+ops.SUM_MULT)/sample_len))
 
 if __name__ == '__main__':
     main()
